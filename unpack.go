@@ -12,23 +12,37 @@ func Do(in string) string {
 	return res
 }
 
+var escaped = false
+var escapedNum = false
+var doubleEscaped = false
+
 func parse(i int, r rune, beforeRune *rune, res *string) {
-	defer func() { *beforeRune = r }()
+	defer func() {
+		escapedNum = escaped && isNum(r)
+		escaped = r == '\\'
+		doubleEscaped = escaped && *beforeRune == '\\'
+		*beforeRune = r
+	}()
 
 	if isNum(r) && i == 0 {
 		return
 	}
 
-	if isNum(r) && isNum(*beforeRune) {
+	if r == '\\' && !escaped {
 		return
 	}
 
-	if isNum(r) {
+	if isNum(r) && isNum(*beforeRune) && !escaped && !escapedNum {
+		return
+	}
+
+	if isNum(r) && !escaped ||
+		isNum(r) && escapedNum ||
+		isNum(r) && doubleEscaped {
 		repeat, _ := strconv.Atoi(string(r))
 		for repeat > 1 {
 			*res += (string(*beforeRune))
 			repeat--
-
 		}
 		return
 	}
