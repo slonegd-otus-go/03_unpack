@@ -49,11 +49,10 @@ func parse(i int, r rune) string {
 	if unicode.IsDigit(r) && !escaped ||
 		unicode.IsDigit(r) && escapedNum ||
 		unicode.IsDigit(r) && doubleEscaped {
-		repeat, _ := strconv.Atoi(string(r))
+
 		var res strings.Builder
-		for repeat > 1 {
+		for repeat, _ := strconv.Atoi(string(r)); repeat > 1; repeat-- {
 			res.WriteRune(lastRune)
-			repeat--
 		}
 		return res.String()
 	}
