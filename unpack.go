@@ -1,53 +1,63 @@
 package unpack
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
 func Do(in string) string {
-	res := ""
-	var beforRune rune
+	escaped = false
+	escapedNum = false
+	doubleEscaped = false
+	lastRune = '\\'
 
+	var res strings.Builder
 	for i, r := range in {
-		parse(i, r, &beforRune, &res)
+		res.WriteString(parse(i, r))
 	}
-	return res
+	return res.String()
 }
 
-var escaped = false
-var escapedNum = false
-var doubleEscaped = false
+var (
+	escaped       bool
+	escapedNum    bool
+	doubleEscaped bool
+	lastRune      rune
+)
 
-func parse(i int, r rune, beforeRune *rune, res *string) {
+func parse(i int, r rune) string {
 	defer func() {
 		escapedNum = escaped && isNum(r)
 		escaped = r == '\\'
-		doubleEscaped = escaped && *beforeRune == '\\'
-		*beforeRune = r
+		doubleEscaped = escaped && lastRune == '\\'
+		lastRune = r
 	}()
 
 	if isNum(r) && i == 0 {
-		return
+		return ""
 	}
 
 	if r == '\\' && !escaped {
-		return
+		return ""
 	}
 
-	if isNum(r) && isNum(*beforeRune) && !escaped && !escapedNum {
-		return
+	if isNum(r) && isNum(lastRune) && !escaped && !escapedNum {
+		return ""
 	}
 
 	if isNum(r) && !escaped ||
 		isNum(r) && escapedNum ||
 		isNum(r) && doubleEscaped {
 		repeat, _ := strconv.Atoi(string(r))
+		var res strings.Builder
 		for repeat > 1 {
-			*res += (string(*beforeRune))
+			res.WriteRune(lastRune)
 			repeat--
 		}
-		return
+		return res.String()
 	}
 
-	*res += string(r)
+	return string(r)
 }
 
 func isNum(r rune) bool {
