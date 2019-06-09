@@ -3,6 +3,7 @@ package unpack
 import (
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 func Do(in string) string {
@@ -27,13 +28,13 @@ var (
 
 func parse(i int, r rune) string {
 	defer func() {
-		escapedNum = escaped && isNum(r)
+		escapedNum = escaped && unicode.IsDigit(r)
 		escaped = r == '\\'
 		doubleEscaped = escaped && lastRune == '\\'
 		lastRune = r
 	}()
 
-	if isNum(r) && i == 0 {
+	if unicode.IsDigit(r) && i == 0 {
 		return ""
 	}
 
@@ -41,13 +42,13 @@ func parse(i int, r rune) string {
 		return ""
 	}
 
-	if isNum(r) && isNum(lastRune) && !escaped && !escapedNum {
+	if unicode.IsDigit(r) && unicode.IsDigit(lastRune) && !escaped && !escapedNum {
 		return ""
 	}
 
-	if isNum(r) && !escaped ||
-		isNum(r) && escapedNum ||
-		isNum(r) && doubleEscaped {
+	if unicode.IsDigit(r) && !escaped ||
+		unicode.IsDigit(r) && escapedNum ||
+		unicode.IsDigit(r) && doubleEscaped {
 		repeat, _ := strconv.Atoi(string(r))
 		var res strings.Builder
 		for repeat > 1 {
@@ -58,8 +59,4 @@ func parse(i int, r rune) string {
 	}
 
 	return string(r)
-}
-
-func isNum(r rune) bool {
-	return r >= '0' && r <= '9'
 }
