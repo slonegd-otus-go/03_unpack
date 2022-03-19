@@ -22,9 +22,10 @@ func TestDo(t *testing.T) {
 		{`6`, `qwe\\5`, `qwe\\\\\`},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := unpack.Do(tt.in)
-			assert.Equal(t, tt.want, got)
-		})
+		got := unpack.Do(tt.in)
+		assert.Equal(t, tt.want, got, tt.name)
+
+		got = unpack.Parse(tt.in)
+		assert.Equal(t, tt.want, got, tt.name)
 	}
 }
